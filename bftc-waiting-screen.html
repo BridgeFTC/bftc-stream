@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BFTC – 対戦待機画面</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --white: #ffffff;
+    --dim: rgba(255,255,255,0.18);
+    --dimmer: rgba(255,255,255,0.06);
+    --accent: rgba(255,255,255,0.55);
+  }
+  body {
+    background: #000;
+    color: var(--white);
+    font-family: 'Noto Sans JP', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px, transparent 3px,
+      rgba(255,255,255,0.018) 3px, rgba(255,255,255,0.018) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+  .header {
+    position: fixed;
+    top: 36px; left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    opacity: 0;
+    animation: fadeUp .7s .2s forwards;
+  }
+  .logo-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: .25em;
+    color: var(--accent);
+  }
+  .dot { width: 4px; height: 4px; background: var(--dim); border-radius: 50%; }
+  .line {
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, transparent, var(--dim), transparent);
+  }
+  .stage {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    max-width: 1100px;
+    padding: 0 40px;
+    opacity: 0;
+    animation: fadeUp .8s .4s forwards;
+  }
+  .team-block {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .team-label {
+    font-size: 11px;
+    letter-spacing: .3em;
+    color: var(--accent);
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+  .team-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(38px, 5.5vw, 72px);
+    letter-spacing: .06em;
+    line-height: 1;
+    text-align: center;
+    word-break: break-all;
+  }
+  .vs-block {
+    flex: 0 0 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 0 20px;
+  }
+  .line-v {
+    width: 1px; height: 80px;
+    background: linear-gradient(to bottom, transparent, var(--dim), transparent);
+  }
+  .vs-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: .1em;
+    color: var(--dim);
+  }
+  .countdown-wrap {
+    margin-top: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp .8s .65s forwards;
+  }
+  .countdown-label {
+    font-size: 11px;
+    letter-spacing: .35em;
+    color: var(--accent);
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+  .countdown-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 9vw, 120px);
+    letter-spacing: .08em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .countdown-display.pulse {
+    animation: pulse .5s ease-in-out;
+  }
+  .start-banner {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 9vw, 120px);
+    letter-spacing: .15em;
+    animation: blinkBig 1s infinite;
+    display: none;
+  }
+
+  .credit-row {
+    display: flex;
+    gap: 20px;
+    align-items: baseline;
+  }
+  .credit-label {
+    font-size: 24px;
+    letter-spacing: .2em;
+    color: rgba(255,255,255,0.6);
+    font-weight: 300;
+    min-width: 160px;
+    text-align: right;
+  }
+  .credit-value {
+    font-size: 24px;
+    letter-spacing: .1em;
+    color: rgba(255,255,255,0.6);
+    font-weight: 300;
+  }
+  .credit-handle {
+    font-size: 24px;
+    color: rgba(255,255,255,0.6);
+    margin-left: 4px;
+  }
+  .footer {
+    position: fixed;
+    bottom: 32px; left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    opacity: 0;
+    animation: fadeUp .7s .85s forwards;
+  }
+  .footer-tag {
+    font-size: 22px;
+    letter-spacing: .25em;
+    color: rgba(255,255,255,0.6);
+    font-weight: 300;
+  }
+  .settings {
+    position: fixed;
+    top: 20px; right: 24px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    z-index: 100;
+  }
+  .settings input[type="text"] {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff;
+    padding: 6px 10px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    border-radius: 3px;
+    width: 150px;
+    outline: none;
+  }
+  .settings input[type="text"]::placeholder { color: rgba(255,255,255,0.3); }
+  .settings input[type="number"] {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff;
+    padding: 6px 8px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    border-radius: 3px;
+    width: 64px;
+    outline: none;
+    text-align: center;
+  }
+  .settings button {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 6px 14px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: .1em;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .settings button:hover { background: rgba(255,255,255,0.18); }
+  .settings label {
+    font-size: 11px;
+    letter-spacing: .15em;
+    color: var(--dim);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  @keyframes blinkBig {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: .3; }
+  }
+</style>
+</head>
+<body>
+
+<!-- header -->
+<div class="header">
+  <span class="logo-text">BRIDGE FTC</span>
+  <div class="dot"></div>
+  <span class="logo-text" style="font-size:14px; letter-spacing:.2em; color:var(--dim);">MATCHING BATTLE</span>
+</div>
+
+<!-- main -->
+<div class="stage">
+  <div class="team-block">
+    <span class="team-label">TEAM A</span>
+    <span class="team-name" id="teamA">TEAM NAME</span>
+  </div>
+  <div class="vs-block">
+    <div class="line-v"></div>
+    <span class="vs-text">VS</span>
+    <div class="line-v"></div>
+  </div>
+  <div class="team-block">
+    <span class="team-label">TEAM B</span>
+    <span class="team-name" id="teamB">TEAM NAME</span>
+  </div>
+</div>
+
+<!-- countdown -->
+<div class="countdown-wrap" id="countdownWrap">
+  <span class="countdown-label">START IN</span>
+  <span class="countdown-display" id="cdDisplay">10:00</span>
+  <span class="start-banner" id="startBanner">FIGHT!</span>
+</div>
+
+<!-- credits -->
+<div class="credits" style="margin-top:36px; display:flex; flex-direction:column; align-items:center; gap:8px; opacity:0; animation:fadeUp .8s .9s forwards;">
+  <div class="credit-row">
+    <span class="credit-label">企画デザイン</span>
+    <span class="credit-value">Bridge FTC</span>
+  </div>
+  <div class="credit-row">
+    <span class="credit-label">MC・実況</span>
+    <span class="credit-value">マクア <span class="credit-handle">@Makuajd_crn</span></span>
+  </div>
+</div>
+
+<!-- footer -->
+<div class="footer">
+  <span class="footer-tag">#BridgeFTC</span>
+  <div class="dot"></div>
+  <span class="footer-tag">闘う理由に、舞台を。</span>
+</div>
+
+
+<!-- settings -->
+<div class="settings">
+  <label>TEAM A</label>
+  <input type="text" id="inputA" placeholder="チーム名A" maxlength="20">
+  <label>TEAM B</label>
+  <input type="text" id="inputB" placeholder="チーム名B" maxlength="20">
+  <label>分</label>
+  <input type="number" id="inputMin" value="10" min="0" max="99">
+  <label>秒</label>
+  <input type="number" id="inputSec" value="0" min="0" max="59">
+  <button id="btnSet">SET</button>
+  <button id="btnStart">START</button>
+  <button id="btnReset">RESET</button>
+</div>
+
+<script>
+  const teamAEl    = document.getElementById('teamA');
+  const teamBEl    = document.getElementById('teamB');
+  const cdDisplay  = document.getElementById('cdDisplay');
+  const startBanner = document.getElementById('startBanner');
+
+  const inputA   = document.getElementById('inputA');
+  const inputB   = document.getElementById('inputB');
+  const inputMin = document.getElementById('inputMin');
+  const inputSec = document.getElementById('inputSec');
+
+  let totalSeconds = 10 * 60;
+  let remaining    = totalSeconds;
+  let timer        = null;
+  let running      = false;
+
+  function fmt(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  }
+
+  function updateDisplay() {
+    cdDisplay.textContent = fmt(remaining);
+    cdDisplay.classList.remove('pulse');
+    void cdDisplay.offsetWidth;
+    if (remaining <= 10 && remaining > 0) cdDisplay.classList.add('pulse');
+  }
+
+  function tick() {
+    if (remaining <= 0) {
+      clearInterval(timer);
+      running = false;
+      cdDisplay.style.display = 'none';
+      startBanner.style.display = 'block';
+      return;
+    }
+    remaining--;
+    // URLパラメータからチーム名・時間を自動設定
+  const urlParams = new URLSearchParams(location.search);
+  if(urlParams.get('teamA')) teamAEl.textContent = urlParams.get('teamA');
+  if(urlParams.get('teamB')) teamBEl.textContent = urlParams.get('teamB');
+  if(urlParams.get('min') || urlParams.get('sec')) {
+    const m = parseInt(urlParams.get('min')) || 0;
+    const s = parseInt(urlParams.get('sec')) || 0;
+    totalSeconds = m * 60 + s;
+    remaining = totalSeconds;
+  }
+
+  updateDisplay();
+  }
+
+  document.getElementById('btnSet').addEventListener('click', () => {
+    const a = inputA.value.trim(); if (a) teamAEl.textContent = a;
+    const b = inputB.value.trim(); if (b) teamBEl.textContent = b;
+    const m = parseInt(inputMin.value) || 0;
+    const s = parseInt(inputSec.value) || 0;
+    totalSeconds = m * 60 + s;
+    remaining    = totalSeconds;
+    clearInterval(timer); running = false;
+    cdDisplay.style.display = '';
+    startBanner.style.display = 'none';
+    updateDisplay();
+  });
+
+  document.getElementById('btnStart').addEventListener('click', () => {
+    if (running || remaining <= 0) return;
+    running = true;
+    timer = setInterval(tick, 1000);
+  });
+
+  document.getElementById('btnReset').addEventListener('click', () => {
+    clearInterval(timer); running = false;
+    remaining = totalSeconds;
+    cdDisplay.style.display = '';
+    startBanner.style.display = 'none';
+    updateDisplay();
+  });
+
+  updateDisplay();
+</script>
+</body>
+</html>
