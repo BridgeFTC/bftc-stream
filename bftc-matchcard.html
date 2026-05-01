@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, initial-scale=1.0">
+<title>BFTC 対戦カード</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&family=Bebas+Neue&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    width:1920px;height:1080px;overflow:hidden;
+    background:#0a0a0a;
+    font-family:'Bebas Neue',sans-serif;
+    color:#f0e8e0;position:relative;
+  }
+  .bg-grid{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(139,0,0,0.06) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(139,0,0,0.06) 1px,transparent 1px);
+    background-size:80px 80px;
+  }
+  .bg-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,0.8) 100%);}
+  .line-left{position:absolute;top:0;left:80px;width:2px;height:100%;background:linear-gradient(to bottom,transparent,#8b0000 20%,#8b0000 80%,transparent);}
+  .line-right{position:absolute;top:0;right:80px;width:2px;height:100%;background:linear-gradient(to bottom,transparent,#8b0000 20%,#8b0000 80%,transparent);}
+  .line-top{position:absolute;top:100px;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,#8b0000 20%,#8b0000 80%,transparent);}
+  .line-bottom{position:absolute;bottom:100px;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,#8b0000 20%,#8b0000 80%,transparent);}
+  .diagonal{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;pointer-events:none;}
+  .diagonal::before{content:'';position:absolute;top:-200px;left:50%;width:2px;height:calc(100% + 400px);background:rgba(139,0,0,0.15);transform:rotate(12deg);}
+  .diagonal::after{content:'';position:absolute;top:-200px;left:50%;width:2px;height:calc(100% + 400px);background:rgba(139,0,0,0.15);transform:rotate(-12deg);}
+  .main{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:16px;
+  }
+  .match-label{font-size:24px;letter-spacing:0.6em;color:#8b0000;}
+  .card-row{
+    display:flex;align-items:center;gap:0;
+    width:100%;max-width:1400px;
+  }
+  .team-card{
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    padding:30px 60px;gap:10px;
+    position:relative;
+  }
+  .team-card::after{
+    content:'';position:absolute;
+    top:20%;bottom:20%;right:0;
+    width:1px;background:linear-gradient(to bottom,transparent,#8b0000,transparent);
+  }
+  .team-card.right::after{display:none;}
+
+  /* チーム名 */
+  .team-name-big{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:50px;font-weight:900;color:#f0e8e0;
+    text-align:center;line-height:1.1;
+  }
+  /* 選手名 */
+  .player-info{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:22px;font-weight:700;
+    color:rgba(240,232,224,0.7);
+    text-align:center;
+  }
+  /* キャラ名 */
+  .chara-name{
+    font-size:28px;letter-spacing:0.2em;
+    color:rgba(240,232,224,0.85);
+  }
+  /* ランク・操作タイプ */
+  .sub-info{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:17px;font-weight:700;
+    color:rgba(139,0,0,0.9);
+    text-align:center;letter-spacing:0.1em;
+  }
+  /* 二つ名 */
+  .player-title{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:32px;font-weight:900;
+    color:#f0e8e0;
+    text-align:center;letter-spacing:0.06em;
+    margin-top:6px;
+    text-shadow:0 0 24px rgba(139,0,0,0.5);
+    border-top:1px solid rgba(139,0,0,0.3);
+    padding-top:10px;
+    width:100%;
+  }
+
+  /* VS中央 */
+  .vs-center{
+    display:flex;flex-direction:column;align-items:center;
+    padding:0 40px;flex-shrink:0;
+  }
+  .vs-big{
+    font-size:88px;letter-spacing:0.1em;color:#8b0000;
+    text-shadow:0 0 40px rgba(139,0,0,0.5);
+    line-height:1;
+  }
+  .match-num{font-size:18px;letter-spacing:0.4em;color:rgba(139,0,0,0.6);}
+  .match-type{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:20px;font-weight:700;
+    color:rgba(240,232,224,0.4);
+    letter-spacing:0.2em;
+    margin-top:8px;
+  }
+  .brand{position:absolute;left:120px;bottom:128px;font-size:20px;letter-spacing:0.4em;color:rgba(139,0,0,0.6);}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-vignette"></div>
+<div class="diagonal"></div>
+<div class="line-left"></div>
+<div class="line-right"></div>
+<div class="line-top"></div>
+<div class="line-bottom"></div>
+
+<div class="main">
+  <div class="match-label">— NEXT MATCH —</div>
+
+  <div class="card-row">
+    <!-- チームA -->
+    <div class="team-card">
+      <div class="team-name-big" id="teamA"></div>
+      <div class="player-info" id="playerA"></div>
+      <div class="chara-name" id="charaA"></div>
+      <div class="sub-info" id="subA"></div>
+      <div class="player-title" id="titleA"></div>
+    </div>
+
+    <!-- VS -->
+    <div class="vs-center">
+      <div class="match-num" id="matchNum">GAME 1</div>
+      <div class="vs-big">VS</div>
+    </div>
+
+    <!-- チームB -->
+    <div class="team-card right">
+      <div class="team-name-big" id="teamB"></div>
+      <div class="player-info" id="playerB"></div>
+      <div class="chara-name" id="charaB"></div>
+      <div class="sub-info" id="subB"></div>
+      <div class="player-title" id="titleB"></div>
+    </div>
+  </div>
+
+  <div class="match-type" id="matchType">STREET FIGHTER 6 — BO3</div>
+</div>
+
+<div class="brand">BRIDGE FTC</div>
+
+<script>
+const p = new URLSearchParams(location.search);
+
+function setText(id, val, wrap) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(val && val.trim()) {
+    el.textContent = wrap ? wrap[0] + val.trim() + wrap[1] : val.trim();
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+setText('teamA',   p.get('teamA'));
+setText('teamB',   p.get('teamB'));
+setText('playerA', p.get('playerA'));
+setText('playerB', p.get('playerB'));
+setText('charaA',  p.get('charaA'));
+setText('charaB',  p.get('charaB'));
+
+// 二つ名は「〇〇〇」形式で表示
+setText('titleA',  p.get('titleA'), ['「', '」']);
+setText('titleB',  p.get('titleB'), ['「', '」']);
+
+// ランク・操作タイプ
+const subAText = [p.get('rankA')||'', p.get('opA')||''].filter(Boolean).join(' ／ ');
+setText('subA', subAText);
+const subBText = [p.get('rankB')||'', p.get('opB')||''].filter(Boolean).join(' ／ ');
+setText('subB', subBText);
+
+// 試合番号
+if(p.get('matchNum')) document.getElementById('matchNum').textContent = 'GAME ' + p.get('matchNum');
+if(p.get('type')) setText('matchType', p.get('type'));
+</script>
+</body>
+</html>
