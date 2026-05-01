@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, initial-scale=1.0">
+<title>BFTC エンディング</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&family=Bebas+Neue&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    width:1920px;height:1080px;overflow:hidden;
+    background:#0a0a0a;
+    font-family:'Bebas Neue',sans-serif;
+    color:#f0e8e0;position:relative;
+  }
+  .bg-grid{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(139,0,0,0.06) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(139,0,0,0.06) 1px,transparent 1px);
+    background-size:80px 80px;
+  }
+  .bg-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,0.85) 100%);}
+  .line-left{position:absolute;top:0;left:80px;width:2px;height:100%;background:linear-gradient(to bottom,transparent,#8b0000 20%,#8b0000 80%,transparent);}
+  .line-right{position:absolute;top:0;right:80px;width:2px;height:100%;background:linear-gradient(to bottom,transparent,#8b0000 20%,#8b0000 80%,transparent);}
+  .line-top{position:absolute;top:100px;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,#8b0000 20%,#8b0000 80%,transparent);}
+  .line-bottom{position:absolute;bottom:100px;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,#8b0000 20%,#8b0000 80%,transparent);}
+
+  /* メインコンテンツ：中央配置 */
+  .main{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:28px;
+  }
+  .winner-label{font-size:20px;letter-spacing:0.6em;color:#8b0000;}
+  .winner-name{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:80px;font-weight:900;color:#f0e8e0;
+    text-align:center;line-height:1.1;
+    text-shadow:0 0 40px rgba(139,0,0,0.6);
+  }
+
+  .score-row{
+    display:flex;align-items:center;gap:40px;
+    margin-top:8px;
+  }
+  .score-block{
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+  }
+  .score-team{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:24px;font-weight:700;
+    color:rgba(240,232,224,0.6);
+    letter-spacing:0.05em;text-align:center;
+  }
+  .score-num{
+    font-size:140px;line-height:1;
+    color:#f0e8e0;
+    text-shadow:0 0 40px rgba(139,0,0,0.4);
+  }
+  .score-num.win{color:#cc2200;text-shadow:0 0 60px rgba(204,34,0,0.8);}
+  .score-divider{
+    font-size:80px;color:rgba(139,0,0,0.4);
+    padding-bottom:20px;
+  }
+
+  .tagline{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:18px;font-weight:700;
+    color:rgba(240,232,224,0.25);
+    letter-spacing:0.2em;
+    margin-top:8px;
+  }
+
+  /* 右下QRコード */
+  .qr-corner{
+    position:absolute;
+    right:120px;bottom:120px;
+    display:flex;flex-direction:column;
+    align-items:center;gap:8px;
+  }
+  .qr-handle{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:14px;letter-spacing:0.2em;
+    color:rgba(240,232,224,0.4);
+  }
+  #qrcode{padding:6px;background:#fff;border-radius:4px;}
+  #qrcode img{display:block;}
+
+  .brand{position:absolute;left:120px;bottom:128px;font-size:20px;letter-spacing:0.4em;color:rgba(139,0,0,0.6);}
+
+  /* コントロールパネル */
+  .settings{
+    position:fixed;top:20px;right:24px;
+    display:flex;gap:10px;align-items:center;
+    z-index:100;
+  }
+  .settings input[type="text"]{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.12);
+    color:#fff;padding:6px 10px;
+    font-family:'Noto Sans JP',sans-serif;font-size:12px;
+    border-radius:3px;width:140px;outline:none;
+  }
+  .settings input[type="text"]::placeholder{color:rgba(255,255,255,0.3);}
+  .settings input[type="number"]{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.12);
+    color:#fff;padding:6px 8px;
+    font-family:'Bebas Neue',sans-serif;font-size:14px;
+    border-radius:3px;width:56px;outline:none;text-align:center;
+  }
+  .settings button{
+    background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.2);
+    color:#fff;padding:6px 14px;
+    font-family:'Bebas Neue',sans-serif;font-size:14px;
+    letter-spacing:.1em;border-radius:3px;cursor:pointer;
+    transition:background .2s;
+  }
+  .settings button:hover{background:rgba(255,255,255,0.18);}
+  .settings label{font-size:11px;letter-spacing:.15em;color:rgba(255,255,255,0.18);}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-vignette"></div>
+<div class="line-left"></div>
+<div class="line-right"></div>
+<div class="line-top"></div>
+<div class="line-bottom"></div>
+
+<!-- メイン -->
+<div class="main">
+  <div class="winner-label">— WINNER —</div>
+  <div class="winner-name" id="winnerName">——</div>
+
+  <div class="score-row">
+    <div class="score-block">
+      <div class="score-team" id="teamA">TEAM A</div>
+      <div class="score-num" id="scoreA">0</div>
+    </div>
+    <div class="score-divider">—</div>
+    <div class="score-block">
+      <div class="score-team" id="teamB">TEAM B</div>
+      <div class="score-num" id="scoreB">0</div>
+    </div>
+  </div>
+
+  <div class="tagline">闘う理由に、舞台を。</div>
+</div>
+
+<!-- 右下QRコード -->
+<div class="qr-corner">
+  <div id="qrcode"></div>
+  <div class="qr-handle">@Bridgeftc2026</div>
+</div>
+
+<div class="brand">BRIDGE FTC</div>
+
+<!-- コントロールパネル -->
+<div class="settings">
+  <label>勝者</label>
+  <input type="text" id="inputWinner" placeholder="勝者チーム名">
+  <label>TEAM A</label>
+  <input type="text" id="inputTeamA" placeholder="チームA名">
+  <label>スコア</label>
+  <input type="number" id="inputScoreA" value="0" min="0" max="99">
+  <label>TEAM B</label>
+  <input type="text" id="inputTeamB" placeholder="チームB名">
+  <label>スコア</label>
+  <input type="number" id="inputScoreB" value="0" min="0" max="99">
+  <button id="btnSet">SET</button>
+  <button id="btnReset">RESET</button>
+</div>
+
+<script>
+new QRCode(document.getElementById('qrcode'), {
+  text: 'https://x.com/Bridgeftc2026',
+  width: 120,
+  height: 120,
+  colorDark: '#000000',
+  colorLight: '#ffffff',
+  correctLevel: QRCode.CorrectLevel.H
+});
+
+function updateScoreColors() {
+  const sA = parseInt(document.getElementById('scoreA').textContent) || 0;
+  const sB = parseInt(document.getElementById('scoreB').textContent) || 0;
+  document.getElementById('scoreA').classList.toggle('win', sA > sB);
+  document.getElementById('scoreB').classList.toggle('win', sB > sA);
+}
+
+document.getElementById('btnSet').addEventListener('click', () => {
+  const winner = document.getElementById('inputWinner').value.trim();
+  const tA = document.getElementById('inputTeamA').value.trim();
+  const tB = document.getElementById('inputTeamB').value.trim();
+  const sA = document.getElementById('inputScoreA').value;
+  const sB = document.getElementById('inputScoreB').value;
+  if(winner) document.getElementById('winnerName').textContent = winner;
+  if(tA) document.getElementById('teamA').textContent = tA;
+  if(tB) document.getElementById('teamB').textContent = tB;
+  document.getElementById('scoreA').textContent = sA;
+  document.getElementById('scoreB').textContent = sB;
+  updateScoreColors();
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  document.getElementById('winnerName').textContent = '——';
+  document.getElementById('teamA').textContent = 'TEAM A';
+  document.getElementById('teamB').textContent = 'TEAM B';
+  document.getElementById('scoreA').textContent = '0';
+  document.getElementById('scoreB').textContent = '0';
+  document.getElementById('scoreA').classList.remove('win');
+  document.getElementById('scoreB').classList.remove('win');
+  document.getElementById('inputWinner').value = '';
+  document.getElementById('inputTeamA').value = '';
+  document.getElementById('inputTeamB').value = '';
+  document.getElementById('inputScoreA').value = '0';
+  document.getElementById('inputScoreB').value = '0';
+});
+</script>
+</body>
+</html>
